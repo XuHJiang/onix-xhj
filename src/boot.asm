@@ -14,15 +14,16 @@ mov sp, 0x7c00
 mov si, booting
 call print
 
-xchg bx, bx
-
 mov edi, 0x1000
-mov ecx, 0
-mov bl, 1
+mov ecx, 2
+mov bl, 4
 
 call read_disk
 
-xchg bx, bx
+cmp word [0x1000], 0x55aa
+jnz error
+
+jmp 0:0x1002
 
 jmp $
 
@@ -108,6 +109,13 @@ print:
 
 booting:
 	db "Booting Onix...", 10, 13, 0;
+
+error:
+	mov si, .msg
+	call print
+	hlt
+	jmp $
+	.msg db "Booting Error!!", 10, 13, 0
 
 
 times 510 - ($ - $$) db 0
