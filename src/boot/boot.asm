@@ -23,7 +23,7 @@ call read_disk
 cmp word[0x1000], 0x55aa
 jnz error
 
-jmp 0:0x1008 ;将loader读取到0x1000这个位置，起始8个字节以占用
+jmp 0:0x1000 ;将loader读取到0x1000这个位置，起始8个字节以占用
 
 jmp $
 
