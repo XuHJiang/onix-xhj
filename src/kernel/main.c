@@ -6,6 +6,7 @@
 #include <onix/printk.h>
 #include <onix/assert.h>
 #include <onix/debug.h>
+#include <onix/global.h>
 
 char message[] = "hello xuhj onix study.!!!!!!!\n";
 char buf[1024];
@@ -14,8 +15,6 @@ void kernel_init()
 {
 	console_init();
 
-	BMB;
-	DEBUGK("debug onix!!!!\n");
-
+	gdt_init();
 	return;
 }
