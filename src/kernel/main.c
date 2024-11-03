@@ -3,29 +3,20 @@
 #include <onix/io.h>
 #include <onix/string.h>
 #include <onix/console.h>
-#include <onix/stdarg.h>
+#include <onix/printk.h>
 
 char message[] = "hello xuhj onix study.!!!!!!!\n";
 char buf[1024];
 
-void test_args(int cnt, ...)
-{
-    va_list args;
-    va_start(args, cnt);
-    
-	int arg;
-    while (cnt--)
-    {
-        arg = va_arg(args, int);
-    }
-
-    va_end(args);
-}
-
 void kernel_init()
 {
 	console_init();
-	test_args(5, 1, 0xaa, 5, 0x55, 10);
+
+	int cnt = 30;
+	while (cnt--)
+	{	
+		printk("hello onix %#010x\n", cnt);
+	}
 
 	return;
 }
