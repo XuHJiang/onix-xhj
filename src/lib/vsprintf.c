@@ -4,6 +4,8 @@
  */
 #include <onix/stdarg.h>
 #include <onix/string.h>
+#include <onix/assert.h>
+
 #define ZEROPAD 1  // 填充零
 #define SIGN 2     // unsigned/signed long
 #define PLUS 4     // 显示加
@@ -323,7 +325,10 @@ int vsprintf(char *buf, const char *fmt, va_list args)
     // 最后在转换好的字符串结尾处添上字符串结束标志
     *str = '\0';
     // 返回转换好的字符串长度值
-    return str - buf;
+    
+    i = str - buf;
+    assert(i < 1024);
+    return i;
 }
 // 结果按格式输出字符串到 buf
 int sprintf(char *buf, const char *fmt, ...)
