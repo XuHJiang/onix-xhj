@@ -2,36 +2,66 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 make: *** No rule to make target 'all'.  Stop.
 
 # GNU Make 4.1
+ 
 # Built for x86_64-pc-linux-gnu
+ 
 # Copyright (C) 1988-2014 Free Software Foundation, Inc.
+ 
 # License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+ 
 # This is free software: you are free to change and redistribute it.
+ 
 # There is NO WARRANTY, to the extent permitted by law.
+ 
 
-# Make data base, printed on Sun Nov  3 09:30:22 2024
+ 
+# Make data base, printed on Wed Nov 13 19:10:19 2024
+ 
 
 # Variables
+ 
 
+ 
 # automatic
+ 
 <D = $(patsubst %/,%,$(dir $<))
+ 
 # automatic
+ 
 ?F = $(notdir $?)
+ 
 # default
+ 
 .SHELLFLAGS := -c
+ 
 # environment
+ 
 VSCODE_AGENT_FOLDER = /root/.vscode-server
+ 
 # automatic
+ 
 ?D = $(patsubst %/,%,$(dir $?))
+ 
 # automatic
+ 
 @D = $(patsubst %/,%,$(dir $@))
+ 
 # automatic
+ 
 @F = $(notdir $@)
+ 
 # default
+ 
 MAKE_VERSION := 4.1
+ 
 # makefile
+ 
 CURDIR := /home/xhj/x86_assembly/x86_assembly
+ 
 # makefile
+ 
 SHELL = /bin/sh
+ 
 # environment
 VSCODE_NLS_CONFIG = {"userLocale":"en","osLocale":"en","resolvedLanguage":"en","defaultMessagesFile":"/root/.vscode-server/cli/servers/Stable-65edc4939843c90c34d61f4ce11704f09d3e5cb6/server/out/nls.messages.json","locale":"en","availableLanguages":{}}
 # environment
@@ -49,11 +79,11 @@ LESSOPEN = | /usr/bin/lesspipe %s
 # environment
 VSCODE_CWD = /root
 # environment
-SSH_CONNECTION = 192.168.1.5 50218 192.168.1.10 22
+SSH_CONNECTION = 192.168.1.6 50415 192.168.1.10 22
 # environment
 PATH = /root/.vscode-server/cli/servers/Stable-65edc4939843c90c34d61f4ce11704f09d3e5cb6/server/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 # environment
-VSCODE_CLI_REQUIRE_TOKEN = 35034bf4-233f-4e06-a92e-46818ade5274
+VSCODE_CLI_REQUIRE_TOKEN = 517e377a-ba96-4299-8f7e-b5566af7cf2e
 # environment
 XDG_RUNTIME_DIR = /run/user/0
 # environment
@@ -65,13 +95,13 @@ LS_COLORS =
 # automatic
 %F = $(notdir $%)
 # environment
-DISPLAY = 192.168.1.5:0.0
+DISPLAY = 192.168.1.6:0.0
 # environment
 SSL_CERT_FILE = /usr/lib/ssl/certs/ca-certificates.crt
 # environment
 PWD = /home/xhj/x86_assembly/x86_assembly
 # environment
-VSCODE_IPC_HOOK_CLI = /run/user/0/vscode-ipc-21852b4b-5652-4cf3-9601-ef29a3da32f2.sock
+VSCODE_IPC_HOOK_CLI = /run/user/0/vscode-ipc-07a08a40-2151-486a-9047-854ca6231209.sock
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
@@ -101,7 +131,7 @@ QT_QPA_PLATFORM = offscreen
 # environment
 VSCODE_ESM_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
 # environment
-XDG_SESSION_ID = 9
+XDG_SESSION_ID = 5
 # environment
 USER = root
 # makefile
@@ -110,8 +140,6 @@ USER = root
 %D = $(patsubst %/,%,$(dir $%))
 # default
 MAKE_COMMAND := make
-# environment
-OLDPWD = /root/.vscode-server
 # default
 .VARIABLES := 
 # automatic
@@ -123,13 +151,11 @@ MAKEFLAGS = pqrR
 # environment
 MFLAGS = -pqrR
 # environment
-SSH_CLIENT = 192.168.1.5 50218 22
+SSH_CLIENT = 192.168.1.6 50415 22
 # environment
 MAIL = /var/mail/root
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
-# environment
-VSCODE_L10N_BUNDLE_LOCATION = 
 # environment
 BROWSER = /root/.vscode-server/cli/servers/Stable-65edc4939843c90c34d61f4ce11704f09d3e5cb6/server/bin/helpers/browser.sh
 # environment
@@ -155,7 +181,7 @@ MAKE_HOST := x86_64-pc-linux-gnu
 # environment
 LANG = C
 # variable set hash-table stats:
-# Load=71/1024=7%, Rehash=0, Collisions=8/93=9%
+# Load=69/1024=7%, Rehash=0, Collisions=8/91=9%
 
 # Pattern-specific Variable Values
 
@@ -221,6 +247,6 @@ GNUmakefile:
 # strcache performance: lookups = 20 / hit rate = 15%
 # hash-table stats:
 # Load=17/8192=0%, Rehash=0, Collisions=1/20=5%
-# Finished Make data base on Sun Nov  3 09:30:22 2024
+# Finished Make data base on Wed Nov 13 19:10:19 2024
 
  
