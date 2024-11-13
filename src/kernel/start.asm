@@ -5,5 +5,8 @@ extern kernel_init
 global _start
 _start:
 	call kernel_init
-	int 0x80; // 调用0x80 中断函数 系统调用
+	;int 0x80; // 调用0x80 中断函数 系统调用
+
+	mov bx, 0
+	div bx
 	jmp $
