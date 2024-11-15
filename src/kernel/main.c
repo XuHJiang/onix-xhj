@@ -9,6 +9,7 @@
 #include <onix/global.h>
 #include <onix/task.h>
 #include <onix/interrupt.h>
+#include <onix/stdlib.h>
 
 char message[] = "hello xuhj onix study.!!!!!!!\n";
 char buf[1024];
@@ -20,5 +21,17 @@ void kernel_init()
 
 	interrupt_init();
 	//task_init();
+
+	asm volatile(
+        "sti\n"
+        "movl %eax, %eax\n");
+
+    u32 counter = 0;
+    while (true)
+    {
+        DEBUGK("looping in kernel init %d...\n", counter++);
+        delay(100000000);
+    }
+	
 	return;
 }
