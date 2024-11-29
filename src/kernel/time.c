@@ -1,6 +1,8 @@
 #include <onix/time.h>
 #include <onix/debug.h>
 #include <onix/stdlib.h>
+#include <onix/rtc.h>
+
 #define LOGK(fmt, args...) DEBUGK(fmt, ##args)
 #define CMOS_ADDR 0x70 // CMOS 地址寄存器
 #define CMOS_DATA 0x71 // CMOS 数据寄存器
@@ -83,12 +85,6 @@ int get_yday(tm *time)
     }
     return res;
 }
-
-u8 cmos_read(u8 addr)
-{
-    outb(CMOS_ADDR, CMOS_NMI | addr);
-    return inb(CMOS_DATA);
-};
 
 void time_read_bcd(tm *time)
 {

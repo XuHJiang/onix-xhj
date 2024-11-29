@@ -42,6 +42,7 @@ $(BUILD)/kernel.bin: \
 	$(BUILD)/kernel/handler.o \
 	$(BUILD)/kernel/clock.o \
 	$(BUILD)/kernel/time.o \
+	$(BUILD)/kernel/rtc.o \
 	$(BUILD)/lib/string.o \
 	$(BUILD)/lib/vsprintf.o \
 	$(BUILD)/lib/stdlib.o
