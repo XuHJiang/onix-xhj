@@ -109,6 +109,9 @@ protect_mode:
 
     call read_disk
 
+    mov eax, 0x20241101; 内核魔数
+    mov ebx, ards_count; ards 数量指针
+
     jmp dword code_selector:0x10000
 
     ud2; 表示出错
@@ -217,7 +220,7 @@ gdt_data:
 gdt_end:
 
 ards_count:
-    dw 0
+    dd 0
 ards_buffer:
 
 
