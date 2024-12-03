@@ -4,6 +4,7 @@
 #include <onix/assert.h>
 #include <onix/stdlib.h>
 #include <onix/string.h>
+#include <onix/bitmap.h>
 
 #define LOGK(fmt, args...) DEBUGK(fmt, ##args)
 #define ZONE_VALID 1    // ards 可用内存区域
@@ -24,7 +25,10 @@ static u32 KERNEL_PAGE_TABLE[] = {
     0x3000,
 };
 
+#define KERNEL_MAP_BITS 0x4000
 #define KERNEL_MEMORY_SIZE (0x100000 * sizeof(KERNEL_PAGE_TABLE))
+
+bitmap_t kernel_map;
 
 typedef struct ards_t
 {
@@ -112,6 +116,11 @@ void memory_map_init()
     }
     
     LOGK("Total pages %d free pages %d\n", total_pages, free_pages);
+
+    // 初始化内核虚拟内存位图，需要 8 位对齐
+    u32 length = (IDX(KERNEL_MEMORY_SIZE) - IDX(MEMORY_BASE)) / 8;
+    bitmap_init(&kernel_map, (u8 *)KERNEL_MAP_BITS, length, IDX(MEMORY_BASE));
+    bitmap_scan(&kernel_map, memory_map_pages);
 }
 
 // 分配一页物理内存
@@ -153,7 +162,7 @@ static void put_page(u32 addr)
     LOGK("PUT page 0x%p\n", addr);
 }
 
-u32 inline get_cr3()
+u32 get_cr3()
 {
     asm volatile("movl %cr3, %eax\n");
 }
@@ -166,8 +175,7 @@ void set_cr3(u32 pde)
 }
 
 // 将 cr0 寄存器最高位 PG 置为 1，启用分页
-static void enable_page()
-{
+static void enable_page() {
     // 0b1000_0000_0000_0000_0000_0000_0000_0000
     // 0x80000000
     asm volatile(
@@ -177,8 +185,7 @@ static void enable_page()
 }
 
 // 初始化页表项
-static void entry_init(page_entry_t *entry, u32 index)
-{
+static void entry_init(page_entry_t *entry, u32 index) {
     *(u32 *)entry = 0;
     entry->present = 1;
     entry->write = 1;
@@ -187,30 +194,27 @@ static void entry_init(page_entry_t *entry, u32 index)
 }
 
 // 初始化内存映射
-void mapping_init()
-{
+void mapping_init() {
     page_entry_t *pde = (page_entry_t *)KERNEL_PAGE_DIR;
     memset(pde, 0, PAGE_SIZE);
     
     idx_t index = 0; 
     
-    for (idx_t didx = 0; didx < (sizeof(KERNEL_PAGE_TABLE) / 4); didx++)
-    {
+    for (idx_t didx = 0; didx < (sizeof(KERNEL_PAGE_TABLE) / 4); didx++) {
     	page_entry_t *pte = (page_entry_t *)KERNEL_PAGE_TABLE[didx];
         memset(pte, 0, PAGE_SIZE);
         
-	page_entry_t *dentry = &pde[didx];
+	    page_entry_t *dentry = &pde[didx];
         entry_init(dentry, IDX((u32)pte));
         
-	for (idx_t tidx = 0; tidx < 1024; tidx++, index++)
-        {
+	    for (idx_t tidx = 0; tidx < 1024; tidx++, index++) {
             // 第 0 页不映射，为造成空指针访问，缺页异常，便于排错
             if (index == 0)
                 continue;
             
-	    page_entry_t *tentry = &pte[tidx];
-            entry_init(tentry, index);
-            memory_map[index] = 1; // 设置物理内存数组，该页被占用
+            page_entry_t *tentry = &pte[tidx];
+                entry_init(tentry, index);
+                memory_map[index] = 1; // 设置物理内存数组，该页被占用
         }
     }
     
@@ -221,55 +225,79 @@ void mapping_init()
     // 设置 cr3 寄存器
     set_cr3((u32)pde);
     
-    BMB;
     // 分页有效
     enable_page();
 }
 
-static page_entry_t *get_pde()
-{
+static page_entry_t *get_pde() {
     return (page_entry_t *)(0xfffff000);
 }
 
-static page_entry_t *get_pte(u32 vaddr)
-{
+static page_entry_t *get_pte(u32 vaddr) {
     return (page_entry_t *)(0xffc00000 | (DIDX(vaddr) << 12));
 }
 
 // 刷新虚拟地址 vaddr 的 块表 TLB
-static void flush_tlb(u32 vaddr)
-{
+static void flush_tlb(u32 vaddr) {
     asm volatile("invlpg (%0)" ::"r"(vaddr)
                  : "memory");
 }
 
-void memory_test()
-{
-    BMB;
-    // 将 20 M 0x1400000 内存映射到 64M 0x4000000 的位置
-    // 我们还需要一个页表，0x900000
-    u32 vaddr = 0x4000000; // 线性地址几乎可以是任意的
-    u32 paddr = 0x1400000; // 物理地址必须要确定存在
-    u32 table = 0x900000;  // 页表也必须是物理地址
+// 从位图中扫描 count 个连续的页
+static u32 scan_page(bitmap_t *map, u32 count) {
+    assert(count > 0);
+    int32 index = bitmap_scan(map, count);
 
-    page_entry_t *pde = get_pde();
-    page_entry_t *dentry = &pde[DIDX(vaddr)];
-    entry_init(dentry, IDX(table));
+    if (index == EOF) {
+        panic("Scan page fail!!!");
+    }
 
-    page_entry_t *pte = get_pte(vaddr);
-    page_entry_t *tentry = &pte[TIDX(vaddr)];
-    entry_init(tentry, IDX(paddr));
+    u32 addr = PAGE(index);
+    LOGK("Scan page 0x%p count %d\n", addr, count);
+    return addr;
+}
 
-    BMB;
-    char *ptr = (char *)(0x4000000);
-    ptr[0] = 'a';
+// 与 scan_page 相对，重置相应的页
+static void reset_page(bitmap_t *map, u32 addr, u32 count) {
+    ASSERT_PAGE(addr);
+    assert(count > 0);
 
-    BMB;
-    entry_init(tentry, IDX(0x1500000));
-    flush_tlb(vaddr);
+    u32 index = IDX(addr);
+    for (size_t i = 0; i < count; i++)
+    {
+        assert(bitmap_test(map, index + i));
+        bitmap_set(map, index + i, 0);
+    }
+}
 
-    BMB;
-    ptr[2] = 'b';
+// 分配 count 个连续的内核页
+u32 alloc_kpage(u32 count) {
+    assert(count > 0);
+    u32 vaddr = scan_page(&kernel_map, count);
 
-    BMB;
+    LOGK("ALLOC kernel pages 0x%p count %d\n", vaddr, count);
+    return vaddr;
+}
+
+// 释放 count 个连续的内核页
+void free_kpage(u32 vaddr, u32 count) {
+    ASSERT_PAGE(vaddr);
+    assert(count > 0);
+
+    reset_page(&kernel_map, vaddr, count);
+    LOGK("FREE  kernel pages 0x%p count %d\n", vaddr, count);
+}
+
+void memory_test() {
+    u32 *pages = (u32 *)(0x200000);
+    u32 count = 0x6fe;
+
+    for (size_t i = 0; i < count; i++) {
+        pages[i] = alloc_kpage(1);
+        LOGK("0x%x\n", i);
+    }
+
+    for (size_t i = 0; i < count; i++) {
+        free_kpage(pages[i], 1);
+    }
 }

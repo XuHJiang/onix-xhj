@@ -18,14 +18,12 @@ void kernel_init()
 	mapping_init();
 	interrupt_init();
 
-        //clock_init();
+    //clock_init();
 	//time_init();	
 	//rtc_init();	
     	
-    	BMB;
-
 	memory_test();
 
-	asm volatile("sti");
+	//asm volatile("sti");
 	hang();
 }
