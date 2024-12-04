@@ -2,6 +2,7 @@
 #include <onix/interrupt.h>
 #include <onix/assert.h>
 #include <onix/debug.h>
+#include <onix/task.h>
 
 #define PIT_CHAN0_REG 0X40
 #define PIT_CHAN2_REG 0X42
@@ -23,34 +24,37 @@ u32 jiffy = JIFFY;
 u32 volatile beeping = 0;
 void start_beep()
 {
-    if (!beeping)
-    {
+    if (!beeping) {
         outb(SPEAKER_REG, inb(SPEAKER_REG) | 0b11);
     }
     beeping = jiffies + 5;
 }
 
-void stop_beep()
-{
-    if (beeping && jiffies > beeping)
-    {
+void stop_beep() {
+    if (beeping && jiffies > beeping) {
         outb(SPEAKER_REG, inb(SPEAKER_REG) & 0xfc);
         beeping = 0;
     }
 }
 
-void clock_handler(int vector)
-{
+void clock_handler(int vector) {
     assert(vector == 0x20);
     send_eoi(vector);
-    
+    stop_beep();
+
     jiffies++;
     //DEBUGK("clock jiffies %d ...\n", jiffies);
-    stop_beep();
+
+    task_t *task = running_task();
+    assert(task->magic == ONIX_MAGIC);
+    task->jiffies = jiffies;
+    task->ticks--;
+    if (!task->ticks) {
+        schedule();
+    }
 }
 
-void pit_init()
-{
+void pit_init() {
     outb(PIT_CTRL_REG, 0b00110100);
     outb(PIT_CHAN0_REG, CLOCK_COUNTER & 0xff);
     outb(PIT_CHAN0_REG, (CLOCK_COUNTER >> 8) & 0xff);
@@ -61,8 +65,7 @@ void pit_init()
     outb(PIT_CHAN2_REG, (u8)(BEEP_COUNTER >> 8));
 }
 
-void clock_init()
-{
+void clock_init() {
     pit_init();
     set_interrupt_handler(IRQ_CLOCK, clock_handler);
     set_interrupt_mask(IRQ_CLOCK, true);

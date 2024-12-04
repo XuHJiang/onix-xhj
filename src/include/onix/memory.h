@@ -6,8 +6,10 @@
 #define PAGE_SIZE 0x1000     // 一页的大小 4K
 #define MEMORY_BASE 0x100000 // 1M，可用内存开始的位置
 
-typedef struct page_entry_t
-{
+// 内核页目录索引
+#define KERNEL_PAGE_DIR 0x1000
+
+typedef struct page_entry_t {
     u8 present : 1;  // 在内存中
     u8 write : 1;    // 0 只读 1 可读可写
     u8 user : 1;     // 1 所有人 0 超级用户 DPL < 3
