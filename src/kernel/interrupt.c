@@ -27,6 +27,8 @@ pointer_t idt_ptr;
 
 handler_t handler_table[IDT_SIZE];
 extern handler_t handler_entry_table[ENTRY_SIZE];
+extern void syscall_handler();
+
 static char *messages[] = {
     "#DE Divide Error\0",
     "#DB RESERVED\0",
@@ -175,10 +177,8 @@ void pic_init()
     outb(PIC_S_DATA, 0b11111111); // 关闭所有中断
 }
 
-void idt_init()
-{
-    for (size_t i = 0; i < ENTRY_SIZE; i++)
-    {
+void idt_init() {
+    for (size_t i = 0; i < ENTRY_SIZE; i++) {
         gate_t *gate = &idt[i];
         handler_t handler = handler_entry_table[i];
         gate->offset0 = (u32)handler & 0xffff;
@@ -191,15 +191,24 @@ void idt_init()
         gate->present = 1;
     }
 
-    for (size_t i = 0; i < 0x20; i++)
-    {
+    for (size_t i = 0; i < 0x20; i++) {
         handler_table[i] = exception_handler;
     }
 
-    for (size_t i = 20; i < ENTRY_SIZE; i++)
-    {
+    for (size_t i = 20; i < ENTRY_SIZE; i++) {
         handler_table[i] = default_handler;
     }
+
+    // 初始化系统调用
+    gate_t *gate = &idt[0x80];
+    gate->offset0 = (u32)syscall_handler & 0xffff;
+    gate->offset1 = ((u32)syscall_handler >> 16) & 0xffff;
+    gate->selector = 1 << 3; // 代码段
+    gate->reserved = 0;      // 保留不用
+    gate->type = 0b1110;     // 中断门
+    gate->segment = 0;       // 系统段
+    gate->DPL = 3;           // 用户态
+    gate->present = 1;       // 有效
 
     idt_ptr.base = (u32)idt;
     idt_ptr.limit = sizeof(idt) - 1;
