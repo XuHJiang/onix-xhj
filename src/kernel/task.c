@@ -6,6 +6,7 @@
 #include <onix/interrupt.h>
 #include <onix/string.h>
 #include <onix/bitmap.h>
+#include <onix/syscall.h>
 
 extern bitmap_t kernel_map;
 extern void task_switch(task_t *next);
@@ -48,6 +49,10 @@ static task_t *task_search(task_state_t state) {
     return task;
 }
 
+void task_yield() {
+    schedule();
+}
+
 task_t *running_task() {
     asm volatile(
         "movl %esp, %eax\n"
@@ -55,8 +60,9 @@ task_t *running_task() {
 }
 
 void schedule() {
-    task_t *current = running_task();
+    assert(!get_interrupt_state()); // 不可中断
 
+    task_t *current = running_task();
     task_t *next = task_search(TASK_READY);
 
     assert(next != NULL);
@@ -115,6 +121,7 @@ u32 thread_a() {
     set_interrupt_state(true);
     while (true) {
         printk("A");
+	yield();
     }
 }
 
@@ -122,6 +129,7 @@ u32 thread_b() {
     set_interrupt_state(true);
     while (true) {
         printk("B");
+	yield();
     }
 }
 
@@ -129,11 +137,11 @@ u32 thread_c() {
     set_interrupt_state(true);
     while (true) {
         printk("C");
+	yield();
     }
 }
 
-void task_init()
-{
+void task_init() {
     task_setup();
 
     task_create(thread_a, "a", 5, KERNEL_USER);
