@@ -48,6 +48,7 @@ $(BUILD)/kernel.bin: \
 	$(BUILD)/lib/bitmap.o \
 	$(BUILD)/lib/string.o \
 	$(BUILD)/lib/vsprintf.o \
+	$(BUILD)/lib/list.o \
 	$(BUILD)/lib/stdlib.o \
 	$(BUILD)/lib/syscall.o 
 
