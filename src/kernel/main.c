@@ -13,14 +13,7 @@ extern void time_init();
 extern void rtc_init();
 extern void task_init();
 extern void syscall_init();
-
 extern void memory_test();
-
-void intr_test() {
-    bool intr = interrupt_disable();
-    // do something
-    set_interrupt_state(intr);
-}
 
 void kernel_init() {
 	memory_map_init();
@@ -34,6 +27,6 @@ void kernel_init() {
     task_init();
     syscall_init();
 
-    list_test();
-    // set_interrupt_state(true);
+
+    set_interrupt_state(true);
 }
