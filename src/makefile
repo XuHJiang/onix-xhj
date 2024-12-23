@@ -46,6 +46,7 @@ $(BUILD)/kernel.bin: \
 	$(BUILD)/kernel/rtc.o \
 	$(BUILD)/kernel/memory.o \
 	$(BUILD)/kernel/gate.o \
+	$(BUILD)/kernel/mutex.o \
 	$(BUILD)/lib/bitmap.o \
 	$(BUILD)/lib/string.o \
 	$(BUILD)/lib/vsprintf.o \

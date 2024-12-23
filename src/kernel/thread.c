@@ -1,6 +1,9 @@
 #include <onix/interrupt.h>
 #include <onix/syscall.h>
 #include <onix/debug.h>
+#include <onix/mutex.h>
+
+mutex_t mutex;
 
 #define LOGK(fmt, args...) DEBUGK(fmt, ##args)
 
@@ -18,12 +21,15 @@ void idle_thread() {
 }
 
 void init_thread() {
+    mutex_init(&mutex);	
     set_interrupt_state(true);
 
     u32 counter = 0;
     while (true) {
+        mutex_lock(&mutex);
         LOGK("init task %d....\n", counter++);
-        sleep(500);
+        mutex_unlock(&mutex);
+        // sleep(500);
     }
 }
 
@@ -32,7 +38,9 @@ void test_thread() {
     u32 counter = 0;
 
     while (true) {
+        mutex_lock(&mutex);
         LOGK("test task %d....\n", counter++);
-        sleep(709);
+        mutex_unlock(&mutex);
+        // sleep(709);
     }
 }
