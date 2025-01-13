@@ -1,7 +1,8 @@
 BUILD:=../build
 SRC:=.
 
-ENTRYPOINT:=0x10000
+MULTIBOOT2:=0x10000
+ENTRYPOINT:=0x10040
 
 CFLAGS:= -m32
 CFLAGS+= -fno-builtin
@@ -26,6 +27,12 @@ $(BUILD)/%.o: $(SRC)/%.asm
 $(BUILD)/%.o: $(SRC)/%.c
 	$(shell mkdir -p $(dir $@))
 	gcc $(CFLAGS) $(DEBUG) $(INCLUDE) -c $< -o $@
+
+LDFLAGS:= -m elf_i386 \
+		-static \
+		-Ttext $(ENTRYPOINT)\
+		--section-start=.multiboot2=$(MULTIBOOT2)
+LDFLAGS:=$(strip ${LDFLAGS})
 
 $(BUILD)/kernel.bin: \
 	$(BUILD)/kernel/start.o \
@@ -55,7 +62,7 @@ $(BUILD)/kernel.bin: \
 	$(BUILD)/lib/syscall.o 
 
 	$(shell mkdir -p $(dir $@))
-	ld -m elf_i386 -static $^ -o $@ -Ttext $(ENTRYPOINT)
+	ld ${LDFLAGS} $^ -o $@
 
 $(BUILD)/system.bin: $(BUILD)/kernel.bin
 	objcopy -O binary $< $@
@@ -74,6 +81,18 @@ $(BUILD)/master.img: $(BUILD)/boot/boot.bin \
 	test -n "$$(find $(BUILD)/system.bin -size -100k)"
 	dd if=$(BUILD)/system.bin of=$@ bs=512 count=200 seek=10 conv=notrunc
 
+$(BUILD)/kernel.iso : $(BUILD)/kernel.bin $(SRC)/utils/grub.cfg
+# 检测内核文件是否合法
+	grub-file --is-x86-multiboot2 $<
+# 创建 iso 目录
+	mkdir -p $(BUILD)/iso/boot/grub
+# 拷贝内核文件
+	cp $< $(BUILD)/iso/boot
+# 拷贝 grub 配置文件
+	cp $(SRC)/utils/grub.cfg $(BUILD)/iso/boot/grub
+# 生成 iso 文件
+	grub-mkrescue -o $@ $(BUILD)/iso
+
 image: $(BUILD)/master.img
 
 .PHONY: clean
@@ -82,7 +101,11 @@ clean:
 
 .PHONY: bochs
 bochs: $(BUILD)/master.img
-	bochs -q
+	bochs -q -f ../bochs/bochsrc 
+
+.PHONY: bochsb
+bochsb: $(BUILD)/kernel.iso
+	bochs -q -f ../bochs/bochsrc.grub 
 
 .PHONY: qemu
 qemu: $(BUILD)/master.img
