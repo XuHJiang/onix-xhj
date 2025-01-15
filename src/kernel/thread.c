@@ -3,7 +3,7 @@
 #include <onix/debug.h>
 #include <onix/mutex.h>
 
-spinlock_t lock;
+lock_t lock;
 
 #define LOGK(fmt, args...) DEBUGK(fmt, ##args)
 
@@ -21,15 +21,15 @@ void idle_thread() {
 }
 
 void init_thread() {
-    spin_init(&lock);
+    lock_init(&lock);
 	
     set_interrupt_state(true);
 
     u32 counter = 0;
     while (true) {
-        spin_lock(&lock);
+        lock_acquire(&lock);
         LOGK("init task %d....\n", counter++);
-        spin_unlock(&lock);
+        lock_release(&lock);
         // sleep(500);
     }
 }
@@ -39,9 +39,9 @@ void test_thread() {
     u32 counter = 0;
 
     while (true) {
-        spin_lock(&lock);
+        lock_acquire(&lock);
         LOGK("test task %d....\n", counter++);
-        spin_unlock(&lock);
+        lock_release(&lock);
         // sleep(709);
     }
 }
