@@ -52,6 +52,7 @@ $(BUILD)/kernel.bin: \
 	$(BUILD)/kernel/time.o \
 	$(BUILD)/kernel/rtc.o \
 	$(BUILD)/kernel/memory.o \
+	$(BUILD)/kernel/keyboard.o \
 	$(BUILD)/kernel/gate.o \
 	$(BUILD)/kernel/mutex.o \
 	$(BUILD)/lib/bitmap.o \

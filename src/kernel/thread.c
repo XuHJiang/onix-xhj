@@ -1,9 +1,6 @@
 #include <onix/interrupt.h>
 #include <onix/syscall.h>
 #include <onix/debug.h>
-#include <onix/mutex.h>
-
-lock_t lock;
 
 #define LOGK(fmt, args...) DEBUGK(fmt, ##args)
 
@@ -21,16 +18,13 @@ void idle_thread() {
 }
 
 void init_thread() {
-    lock_init(&lock);
 	
     set_interrupt_state(true);
 
     u32 counter = 0;
     while (true) {
-        lock_acquire(&lock);
-        LOGK("init task %d....\n", counter++);
-        lock_release(&lock);
-        // sleep(500);
+        //LOGK("init task %d....\n", counter++);
+         sleep(500);
     }
 }
 
@@ -39,9 +33,7 @@ void test_thread() {
     u32 counter = 0;
 
     while (true) {
-        lock_acquire(&lock);
-        LOGK("test task %d....\n", counter++);
-        lock_release(&lock);
-        // sleep(709);
+        //LOGK("test task %d....\n", counter++);
+        sleep(709);
     }
 }
