@@ -59,6 +59,7 @@ $(BUILD)/kernel.bin: \
 	$(BUILD)/lib/string.o \
 	$(BUILD)/lib/vsprintf.o \
 	$(BUILD)/lib/list.o \
+	$(BUILD)/lib/fifo.o \
 	$(BUILD)/lib/stdlib.o \
 	$(BUILD)/lib/syscall.o 
 
